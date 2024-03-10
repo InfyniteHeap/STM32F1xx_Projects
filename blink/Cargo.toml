@@ -1,0 +1,23 @@
+[package]
+name = "blink"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cortex-m = "0.7.7"
+cortex-m-rt = "0.7.3"
+panic-halt = "0.2.0"
+embedded-hal = "1.0.0"
+nb = "1.1.0"
+
+[dependencies.stm32f1xx-hal]
+version = "0.10.0"
+features = ["rt", "stm32f103", "medium"]
+
+[profile.release]
+strip = true
+lto = true
+panic = 'abort'
+codegen-units = 1
