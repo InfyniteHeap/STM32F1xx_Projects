@@ -1,0 +1,22 @@
+[tasks.build]
+command = "cargo"
+args = ["build", "--release"]
+
+[tasks.erase]
+command = "ST-LINK_CLI"
+args = ["-ME"]
+
+[tasks.program]
+dependencies = ["build"]
+command = "openocd"
+args = [
+    "-f",
+    "interface/stlink.cfg",
+    "-f",
+    "target/stm32f1x.cfg",
+    "-c",
+    "program target/thumbv7m-none-eabi/release/${CARGO_MAKE_CRATE_NAME} verify reset exit",
+]
+
+[tasks.clean_program]
+dependencies = ["build", "erase", "program"]
