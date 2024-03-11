@@ -13,9 +13,17 @@ use stm32f1xx_hal::{pac, prelude::*, rtc::Rtc};
 fn main() -> ! {
     let dp = pac::Peripherals::take().unwrap();
 
+    let dp_base = unsafe {
+        core::ptr::read(core::ptr::addr_of!(dp) as *mut pac::Peripherals)
+    };
+
     let mut pwr = dp.PWR;
     let rcc = dp.RCC.constrain();
     let bkp = dp.BKP;
+
+    let rcc_base = unsafe {
+        core::ptr::read(core::ptr::addr_of!(rcc) as *mut stm32f1xx_hal::rcc::Rcc)
+    };
 
     let mut rtc = Rtc::new(dp.RTC, &mut rcc.bkp.constrain(bkp, &mut pwr));
 
@@ -23,10 +31,16 @@ fn main() -> ! {
 
     let mut buf = itoa::Buffer::new();
     loop {
-        let gpiob = dp.GPIOB.split();
-        let afio = dp.AFIO.constrain();
-        let flash = dp.FLASH.constrain();
-        let i2c = dp.I2C1;
+        let dp_ptr = unsafe {
+            core::ptr::read(core::ptr::addr_of!(dp_base) as *mut pac::Peripherals)
+        };
+        let rcc = unsafe {
+            core::ptr::read(core::ptr::addr_of!(rcc_base) as *mut stm32f1xx_hal::rcc::Rcc)
+        };
+        let gpiob = dp_ptr.GPIOB.split();
+        let afio = dp_ptr.AFIO.constrain();
+        let flash = dp_ptr.FLASH.constrain();
+        let i2c = dp_ptr.I2C1;
         let oled = oled_init(gpiob, afio, flash, rcc.cfgr, i2c);
         oled_display(oled, buf.format(rtc.current_time()));
     }
